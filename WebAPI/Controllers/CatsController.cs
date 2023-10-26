@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using WebAPI.Models;
 using WebAPI.Data;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace WebAPI.Controllers
 {
@@ -88,11 +89,21 @@ namespace WebAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Cat>> PostCat(Cat cat)
         {
-          if (_context.Cats == null)
-          {
-              return Problem("Entity set 'WebAPIContext.Cat'  is null.");
-          }
+            if (_context.Cats == null)
+            {
+                return Problem("Entity set 'WebAPIContext.Cat'  is null.");
+            }
+
+
+            string? userid = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            DemoUser user = _context.Users.Single(u => u.Id == userid);
+            
+            
+
             _context.Cats.Add(cat);
+            cat.DemoUser = user;
+
+
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetCat", new { id = cat.Id }, cat);
