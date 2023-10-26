@@ -8,9 +8,10 @@ using WebAPI.Data;
 using WebAPI.Models;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<WebAPIContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("WebAPIContext") ?? throw new InvalidOperationException("Connection string 'WebAPIContext' not found.")));
-
+builder.Services.AddDbContext<WebAPIContext>(options => {
+    options.UseSqlServer(builder.Configuration.GetConnectionString("WebAPIContext"));
+    options.UseLazyLoadingProxies();
+});
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -22,6 +23,17 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddIdentity<DemoUser, IdentityRole>()
         .AddEntityFrameworkStores<WebAPIContext>()
         .AddDefaultTokenProviders();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", builder =>
+    {
+        builder.AllowAnyOrigin();
+        builder.AllowAnyHeader();
+        builder.AllowAnyMethod();
+    });
+});
+
 
 builder.Services.AddAuthentication(options =>
 {
@@ -55,6 +67,8 @@ app.UseHttpsRedirection();
 
 //TODO Ajouter l'utilisation de notre configuration d'Identity
 app.UseAuthentication();
+
+app.UseCors("AllowAll");
 
 app.UseAuthorization();
 
