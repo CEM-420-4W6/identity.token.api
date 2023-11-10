@@ -54,7 +54,7 @@ namespace WebAPI.Controllers
                     claims: authClaims,
                     expires: DateTime.Now.AddHours(1),
                     signingCredentials: new SigningCredentials(authkey, SecurityAlgorithms.HmacSha256)
-                    );
+                );
 
 
                 return Ok(new
@@ -64,7 +64,7 @@ namespace WebAPI.Controllers
                 });
             }
 
-            return StatusCode(StatusCodes.Status500InternalServerError, new { Error = "L'utilisateur est introuvable ou le mot de passe de concorde pas" });
+            return BadRequest(new { Error = "L'utilisateur est introuvable ou le mot de passe de concorde pas" });
         }
 
 
@@ -74,7 +74,7 @@ namespace WebAPI.Controllers
         {
             if (register.Password != register.PasswordConfirm)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Error = "Le mot de passe et la confirmation ne sont pas identique" });
+                return BadRequest(new { Error = "Le mot de passe et la confirmation ne sont pas identique" });
             }
 
             DemoUser user = new DemoUser()
@@ -82,11 +82,11 @@ namespace WebAPI.Controllers
                 UserName = register.UserName,
                 Email = register.Email
             };
-            IdentityResult identityResult = await this.userManager.CreateAsync(user, register.Password);
+            IdentityResult identityResult = await userManager.CreateAsync(user, register.Password);
 
             if (!identityResult.Succeeded)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Error = identityResult.Errors });
+                return BadRequest(identityResult);
             }
 
 
